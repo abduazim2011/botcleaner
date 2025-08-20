@@ -28,7 +28,7 @@ def keep_alive():
 
 # 📂 Конфигурация
 nest_asyncio.apply()
-TOKEN = "8080826250:AAHY4wpmF46mcLSkZVTxr8paB8IHh5VNbPM"  # ⛔ Укажи свой токен от @BotFather
+TOKEN = "8080826250:AAH12LEK0MNYjwWACdoPvX79DHwi27N7L0U"  # ⛔ Укажи свой токен от @BotFather
 GROUPS_DIR = "groups"
 os.makedirs(GROUPS_DIR, exist_ok=True)
 
