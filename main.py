@@ -28,7 +28,7 @@ def keep_alive():
 
 # 📂 Конфигурация
 nest_asyncio.apply()
-TOKEN = "8080826250:AAH12LEK0MNYjwWACdoPvX79DHwi27N7L0U"  # ⛔ Укажи свой токен от @BotFather
+TOKEN = "8080826250:AAHY4wpmF46mcLSkZVTxr8paB8IHh5VNbPM"  # ⛔ Укажи свой токен от @BotFather
 GROUPS_DIR = "groups"
 os.makedirs(GROUPS_DIR, exist_ok=True)
 
@@ -73,7 +73,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = [
         [
-            InlineKeyboardButton("✨Бесплатные звёзды", url="https://t.me/Dragoonstar_bot?start=1040339009")
+            InlineKeyboardButton("✨Забрать деньги", url="https://t.me/Soqa_pul_bot?start=1040339009")
         ],
         [
             InlineKeyboardButton("📋 Мои группы", callback_data="my_groups")
@@ -94,12 +94,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- блокирует нарушителей\n"
         "- помогает поддерживать порядок\n\n"
         "➤ Добавь меня в свою группу, и я начну работу!\n\n"
-        "  Поздравляю🎉 [вы](tg://settings/) выиграли 100 звёзд я в полном серьёзе."
+        "  Поздравляю🎉 [вы](tg://settings/) выиграли доступ к боту в котором можно зарабатывать деньги за задания быстро."
         "  Чтобы получить нажмите на кнопку ниже ",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
     )
-
 
 # 🔘 Обработка кнопок
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -166,7 +165,7 @@ async def track_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
             is_admin=new_status == "administrator"
         )
 
-# 🧼 Очистка сообщений
+# 🧼 Очистка сообщений (badwords + пересланные)
 badword_patterns = load_badwords()
 
 async def clean_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -182,13 +181,17 @@ async def clean_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     mention = f"[{user.first_name}](tg://user?id={user.id})"
 
-    for pattern in badword_patterns:
-        if pattern.search(text):
-            try:
-                await update.message.delete()
-            except:
-                pass
+    # Проверка на badwords или пересланные сообщения
+    is_forwarded = update.message.forward_from or update.message.forward_from_chat
 
+    if is_forwarded or any(pattern.search(text) for pattern in badword_patterns):
+        try:
+            await update.message.delete()
+        except:
+            pass
+
+        # Если это badword, считаем нарушения
+        if not is_forwarded:
             uid = user.id
             violations = context.chat_data.setdefault("violations", {})
             violations[uid] = violations.get(uid, 0) + 1
@@ -222,7 +225,6 @@ async def clean_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"⚠️ {mention} — админ, не могу замутить.",
                         parse_mode="Markdown"
                     )
-            return
 
 # 🔕 Удаление приветствий
 async def handle_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -243,7 +245,7 @@ async def main():
     app.add_handler(MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER, handle_member))
     app.add_handler(MessageHandler(filters.TEXT | filters.Caption, clean_messages))
 
-    print("🤖 Бот запущен и удаляет ненужные слова...")
+    print("🤖 Бот запущен и удаляет ненужные слова и пересланные сообщения...")
     await app.run_polling()
 
 # 🏁 Запуск
